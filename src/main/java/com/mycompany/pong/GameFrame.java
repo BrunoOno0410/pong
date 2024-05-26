@@ -1,14 +1,13 @@
 package com.mycompany.pong;
+
 import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
 import javax.swing.*;
 
-public class GameFrame extends JFrame{
-  
+public class GameFrame extends JFrame {
+
     GamePanel panel;
-    
-    GameFrame(){
+
+    GameFrame() {
         panel = new GamePanel();
         this.add(panel);
         this.setTitle("Pong Game");
@@ -18,6 +17,6 @@ public class GameFrame extends JFrame{
         this.pack();
         this.setVisible(true);
         this.setLocationRelativeTo(null);
-        
+
     }
 }
