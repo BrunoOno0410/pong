@@ -12,10 +12,12 @@ public class PongServerThread extends Thread {
     private Socket socket;
     private BufferedReader input;
     private PrintWriter output;
+    private PongServer server;
     private PongServerForm form;
 
-    public PongServerThread(Socket socket, PongServerForm form) {
+    public PongServerThread(Socket socket, PongServer server, PongServerForm form) {
         this.socket = socket;
+        this.server = server;
         this.form = form;
     }
 
@@ -62,7 +64,7 @@ public class PongServerThread extends Thread {
                         break;
                 }
                 form.repaint();
-                sendMessage(message);
+                server.broadcast(message);
             }
             socket.close();
         } catch (IOException ex) {
@@ -70,7 +72,7 @@ public class PongServerThread extends Thread {
         }
     }
 
-    private synchronized void sendMessage(String message) {
+    synchronized void sendMessage(String message) {
         output.println(message);
     }
 }
