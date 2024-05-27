@@ -9,6 +9,8 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 public class PongClient extends JFrame {
     private Socket socket;
@@ -18,7 +20,7 @@ public class PongClient extends JFrame {
 
     public PongClient(String player) {
         try {
-            socket = new Socket("localhost", 12345); // Certifique-se de que o endereço e a porta estão corretos
+            socket = new Socket("localhost", 1234); // Certifique-se de que o endereço e a porta estão corretos
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out = new PrintWriter(socket.getOutputStream(), true);
 
@@ -33,20 +35,37 @@ public class PongClient extends JFrame {
             out.println(player);
 
             // Thread para receber atualizações do servidor
-            new Thread(new Runnable() {
-                public void run() {
-                    try {
-                        String message;
-                        while ((message = in.readLine()) != null) {
-                            // Processar a mensagem do servidor (ex: atualizar posição do jogador, bola,
-                            // etc.)
-                            gamePanel.updateGameState(message);
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
+            new Thread(() -> {
+                try {
+                    String message;
+                    while ((message = in.readLine()) != null) {
+                        // Processar a mensagem do servidor (ex: atualizar posição do jogador, bola,
+                        // etc.)
+                        gamePanel.updateGameState(message);
                     }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }).start();
+
+            // Adicionar KeyListener para capturar eventos de tecla pressionada
+            gamePanel.addKeyListener(new KeyListener() {
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    out.println(player + ":" + e.getKeyCode());
+                }
+
+                @Override
+                public void keyReleased(KeyEvent e) {
+                }
+
+                @Override
+                public void keyTyped(KeyEvent e) {
+                }
+            });
+            gamePanel.setFocusable(true);
+            gamePanel.requestFocusInWindow();
+
         } catch (IOException e) {
             e.printStackTrace();
         }

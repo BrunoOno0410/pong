@@ -12,12 +12,10 @@ public class PongServerThread extends Thread {
     private Socket socket;
     private BufferedReader input;
     private PrintWriter output;
-    private PongServer server;
     private PongServerForm form;
 
     public PongServerThread(Socket socket, PongServer server, PongServerForm form) {
         this.socket = socket;
-        this.server = server;
         this.form = form;
     }
 
@@ -37,9 +35,22 @@ public class PongServerThread extends Thread {
                 if (message == null || message.equals("")) {
                     break;
                 }
+
+                // Verificação de validade da mensagem
                 String[] parts = message.split(":");
+                if (parts.length != 2) {
+                    System.out.println("Formato de mensagem inválido: " + message);
+                    continue;
+                }
+
                 String player = parts[0];
-                int code = Integer.parseInt(parts[1]);
+                int code;
+                try {
+                    code = Integer.parseInt(parts[1]);
+                } catch (NumberFormatException e) {
+                    System.out.println("Código inválido na mensagem: " + message);
+                    continue;
+                }
 
                 switch (player) {
                     case "player1":
@@ -62,9 +73,12 @@ public class PongServerThread extends Thread {
                                 break;
                         }
                         break;
+                    default:
+                        System.out.println("Player desconhecido: " + player);
+                        continue;
                 }
                 form.repaint();
-                server.broadcast(message);
+                sendMessage(message);
             }
             socket.close();
         } catch (IOException ex) {
