@@ -1,6 +1,7 @@
 package com.mycompany.pong;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ public class PongServer extends Thread {
 
     public void run() {
         try {
-            serverSocket = new ServerSocket(port);
+            serverSocket = new ServerSocket(port, 0, InetAddress.getByName("0.0.0.0"));
             System.out.println("Server started on port " + port);
             form.updateStatus("Server started on port " + port);
 
