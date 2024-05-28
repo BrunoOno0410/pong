@@ -8,7 +8,8 @@ import javax.swing.SwingUtilities;
 public class PongServerForm extends javax.swing.JFrame {
 
         int player1Y = 150, player2Y = 150, ballX = 290, ballY = 190, ballDirX = 3, ballDirY = 3;
-        int playerHeight = 50, playerWidth = 10, ballSize = 20;
+        int playerHeight = 50;
+        int player1Score = 0, player2Score = 0;
 
         public PongServerForm() {
                 initComponents();
@@ -16,9 +17,11 @@ public class PongServerForm extends javax.swing.JFrame {
 
         public void atualizaPainel(Graphics g) {
                 g.setColor(Color.green);
-                g.fillRect(10, player1Y, playerWidth, playerHeight);
-                g.fillRect(580, player2Y, playerWidth, playerHeight);
-                g.fillOval(ballX, ballY, ballSize, ballSize);
+                g.fillRect(10, player1Y, 10, playerHeight);
+                g.fillRect(580, player2Y, 10, playerHeight);
+                g.fillOval(ballX, ballY, 20, 20);
+                g.drawString("Player 1: " + player1Score, 10, 10);
+                g.drawString("Player 2: " + player2Score, 500, 10);
         }
 
         // New method to update status
@@ -133,7 +136,7 @@ public class PongServerForm extends javax.swing.JFrame {
                 System.exit(0);
         }
 
-        public static void main(String args[]) {
+        public static void main(String[] args) {
                 java.awt.EventQueue.invokeLater(() -> new PongServerForm().setVisible(true));
         }
 

@@ -13,10 +13,12 @@ public class PongServerThread extends Thread {
     private BufferedReader input;
     private PrintWriter output;
     private PongServerForm form;
+    private PongServer server;
 
     public PongServerThread(Socket socket, PongServer server, PongServerForm form) {
         this.socket = socket;
         this.form = form;
+        this.server = server;
     }
 
     @Override
@@ -56,20 +58,20 @@ public class PongServerThread extends Thread {
                     case "player1":
                         switch (code) {
                             case KeyEvent.VK_UP:
-                                form.player1Y -= 3;
+                                form.player1Y = Math.max(0, form.player1Y - 3);
                                 break;
                             case KeyEvent.VK_DOWN:
-                                form.player1Y += 3;
+                                form.player1Y = Math.min(350, form.player1Y + 3);
                                 break;
                         }
                         break;
                     case "player2":
                         switch (code) {
                             case KeyEvent.VK_UP:
-                                form.player2Y -= 3;
+                                form.player2Y = Math.max(0, form.player2Y - 3);
                                 break;
                             case KeyEvent.VK_DOWN:
-                                form.player2Y += 3;
+                                form.player2Y = Math.min(350, form.player2Y + 3);
                                 break;
                         }
                         break;
@@ -78,7 +80,8 @@ public class PongServerThread extends Thread {
                         continue;
                 }
                 form.repaint();
-                sendMessage(message);
+                server.broadcast("P1:" + form.player1Y + " P2:" + form.player2Y + " BALL:" + form.ballX + ","
+                        + form.ballY + " SCORE:" + server.player1Score + "," + server.player2Score);
             }
             socket.close();
         } catch (IOException ex) {

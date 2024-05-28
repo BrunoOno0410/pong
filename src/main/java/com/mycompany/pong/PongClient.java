@@ -41,7 +41,11 @@ public class PongClient extends JFrame {
                     while ((message = in.readLine()) != null) {
                         // Processar a mensagem do servidor (ex: atualizar posição do jogador, bola,
                         // etc.)
-                        gamePanel.updateGameState(message);
+                        if (message.equals("START_GAME")) {
+                            gamePanel.startGame();
+                        } else {
+                            gamePanel.updateGameState(message);
+                        }
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -73,6 +77,7 @@ public class PongClient extends JFrame {
 
     private class GamePanel extends JPanel {
         int player1Y = 150, player2Y = 150, ballX = 290, ballY = 190;
+        private int player1Score = 0, player2Score = 0;
 
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -80,18 +85,33 @@ public class PongClient extends JFrame {
             g.fillRect(10, player1Y, 10, 50);
             g.fillRect(580, player2Y, 10, 50);
             g.fillOval(ballX, ballY, 20, 20);
+            g.drawString("Player 1: " + player1Score, 10, 10);
+            g.drawString("Player 2: " + player2Score, 500, 10);
         }
 
         public void updateGameState(String message) {
             // Processar a mensagem e atualizar os estados do jogo
-            // Exemplo de mensagem: "P1:150 P2:150 BALL:290,190"
+            // Exemplo de mensagem: "P1:150 P2:150 BALL:290,190 SCORE:1,0"
             String[] parts = message.split(" ");
-            player1Y = Integer.parseInt(parts[0].split(":")[1]);
-            player2Y = Integer.parseInt(parts[1].split(":")[1]);
-            String[] ballCoords = parts[2].split(":")[1].split(",");
-            ballX = Integer.parseInt(ballCoords[0]);
-            ballY = Integer.parseInt(ballCoords[1]);
+            if (parts.length > 3) {
+                player1Y = Integer.parseInt(parts[0].split(":")[1]);
+                player2Y = Integer.parseInt(parts[1].split(":")[1]);
+                String[] ballCoords = parts[2].split(":")[1].split(",");
+                if (ballCoords.length > 1) {
+                    ballX = Integer.parseInt(ballCoords[0]);
+                    ballY = Integer.parseInt(ballCoords[1]);
+                }
+                String[] scores = parts[3].split(":")[1].split(",");
+                if (scores.length > 1) {
+                    player1Score = Integer.parseInt(scores[0]);
+                    player2Score = Integer.parseInt(scores[1]);
+                }
+            }
             repaint();
+        }
+
+        public void startGame() {
+            // Iniciar a lógica do jogo se necessário
         }
     }
 
