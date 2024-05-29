@@ -17,6 +17,7 @@ public class PongServer extends Thread {
     private int ballX = 290, ballY = 190, ballDirX = 3, ballDirY = 3;
     public int player1Y = 150, player2Y = 150;
     private final int playerHeight = 50;
+    private final int ballSize = 20; // Adicionando o tamanho da bola
 
     public PongServer(int port, PongServerForm form) {
         this.port = port;
@@ -38,6 +39,7 @@ public class PongServer extends Thread {
                 clients.add(clientThread);
                 clientThread.start();
 
+                System.out.println("Clients connected: " + clients.size());
                 if (clients.size() == 2 && !gameStarted) {
                     startGame();
                 }
@@ -54,21 +56,21 @@ public class PongServer extends Thread {
         new Thread(this::gameLoop).start();
     }
 
-    private void gameLoop() {
+    public void gameLoop() {
         while (true) {
             ballX += ballDirX;
             ballY += ballDirY;
 
             // Colisão com as bordas superiores e inferiores
-            if (ballY <= 0 || ballY >= 380) {
+            if (ballY <= 0 || ballY >= 380 - ballSize) {
                 ballDirY = -ballDirY;
             }
 
             // Colisão com as barras dos jogadores
-            if (ballX <= 20 && ballY >= player1Y && ballY <= player1Y + playerHeight) {
+            if (ballX <= 20 && ballY + ballSize >= player1Y && ballY <= player1Y + playerHeight) {
                 ballDirX = -ballDirX;
             }
-            if (ballX >= 560 && ballY >= player2Y && ballY <= player2Y + playerHeight) {
+            if (ballX >= 560 - ballSize && ballY + ballSize >= player2Y && ballY <= player2Y + playerHeight) {
                 ballDirX = -ballDirX;
             }
 
@@ -77,7 +79,7 @@ public class PongServer extends Thread {
                 player2Score++;
                 resetBall();
             }
-            if (ballX >= 580) {
+            if (ballX >= 580 - ballSize) {
                 player1Score++;
                 resetBall();
             }

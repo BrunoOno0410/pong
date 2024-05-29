@@ -55,6 +55,7 @@ public class PongServerForm extends javax.swing.JFrame {
                 jButton1 = new javax.swing.JButton();
                 jButton2 = new javax.swing.JButton();
                 jPanel1 = new JPanel() {
+                        @Override
                         public void paintComponent(Graphics g) {
                                 super.paintComponent(g);
                                 atualizaPainel(g);
@@ -63,56 +64,70 @@ public class PongServerForm extends javax.swing.JFrame {
                 statusLabel = new javax.swing.JLabel();
 
                 setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-                jLabel1.setText("Porta do servidor TCP:");
-                jTextField1.setText("1234");
-                jButton1.setText("Iniciar");
-                jButton1.addActionListener(evt -> jButton1ActionPerformed(evt));
-                jButton2.setText("Sair");
-                jButton2.addActionListener(evt -> jButton2ActionPerformed(evt));
+
+                jLabel1.setText("Port:");
+
+                jButton1.setText("Start Server");
+                jButton1.addActionListener(new java.awt.event.ActionListener() {
+                        public void actionPerformed(java.awt.event.ActionEvent evt) {
+                                startServer(evt);
+                        }
+                });
+
+                jButton2.setText("Stop Server");
+                jButton2.addActionListener(new java.awt.event.ActionListener() {
+                        public void actionPerformed(java.awt.event.ActionEvent evt) {
+                                stopServer(evt);
+                        }
+                });
+
                 jPanel1.setBackground(new java.awt.Color(0, 0, 0));
-                jPanel1.setPreferredSize(new java.awt.Dimension(600, 400));
 
                 javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
                 jPanel1.setLayout(jPanel1Layout);
                 jPanel1Layout.setHorizontalGroup(
                                 jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                .addGap(0, 601, Short.MAX_VALUE));
+                                                .addGap(0, 600, Short.MAX_VALUE));
                 jPanel1Layout.setVerticalGroup(
                                 jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                .addGap(0, 401, Short.MAX_VALUE));
+                                                .addGap(0, 400, Short.MAX_VALUE));
+
+                statusLabel.setText("Status:");
 
                 javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
                 getContentPane().setLayout(layout);
                 layout.setHorizontalGroup(
                                 layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                                 .addGroup(layout.createSequentialGroup()
-                                                                .addContainerGap()
+                                                                .addGap(31, 31, 31)
                                                                 .addGroup(layout.createParallelGroup(
                                                                                 javax.swing.GroupLayout.Alignment.LEADING)
                                                                                 .addComponent(jPanel1,
-                                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
-                                                                                                601,
-                                                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                                                Short.MAX_VALUE)
                                                                                 .addGroup(layout.createSequentialGroup()
                                                                                                 .addComponent(jLabel1)
                                                                                                 .addPreferredGap(
-                                                                                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                                                                javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                                                                                 .addComponent(jTextField1,
                                                                                                                 javax.swing.GroupLayout.PREFERRED_SIZE,
-                                                                                                                76,
+                                                                                                                96,
                                                                                                                 javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                                                                .addPreferredGap(
-                                                                                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                                                .addGap(18, 18, 18)
                                                                                                 .addComponent(jButton1)
+                                                                                                .addGap(18, 18, 18)
+                                                                                                .addComponent(jButton2)
                                                                                                 .addPreferredGap(
-                                                                                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                                                                .addComponent(jButton2))
-                                                                                .addComponent(statusLabel))
-                                                                .addContainerGap(18, Short.MAX_VALUE)));
+                                                                                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED,
+                                                                                                                101,
+                                                                                                                Short.MAX_VALUE)
+                                                                                                .addComponent(statusLabel)))
+                                                                .addContainerGap()));
                 layout.setVerticalGroup(
                                 layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                                 .addGroup(layout.createSequentialGroup()
-                                                                .addGap(5, 5, 5)
+                                                                .addGap(29, 29, 29)
                                                                 .addGroup(layout.createParallelGroup(
                                                                                 javax.swing.GroupLayout.Alignment.BASELINE)
                                                                                 .addComponent(jLabel1)
@@ -121,32 +136,27 @@ public class PongServerForm extends javax.swing.JFrame {
                                                                                                 javax.swing.GroupLayout.DEFAULT_SIZE,
                                                                                                 javax.swing.GroupLayout.PREFERRED_SIZE)
                                                                                 .addComponent(jButton1)
-                                                                                .addComponent(jButton2))
+                                                                                .addComponent(jButton2)
+                                                                                .addComponent(statusLabel))
                                                                 .addPreferredGap(
-                                                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                                javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                                                 .addComponent(jPanel1,
-                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
-                                                                                401,
-                                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                                .addPreferredGap(
-                                                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                                .addComponent(statusLabel)
-                                                                .addContainerGap(23, Short.MAX_VALUE)));
+                                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                                Short.MAX_VALUE)
+                                                                .addContainerGap()));
+
                 pack();
         }
 
-        private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {
-                String porta = jTextField1.getText();
-                int port = Integer.parseInt(porta);
-                (new PongServer(port, this)).start();
+        private void startServer(java.awt.event.ActionEvent evt) {
+                int port = Integer.parseInt(jTextField1.getText());
+                PongServer server = new PongServer(port, this);
+                server.start();
         }
 
-        private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {
-                System.exit(0);
-        }
-
-        public static void main(String[] args) {
-                java.awt.EventQueue.invokeLater(() -> new PongServerForm().setVisible(true));
+        private void stopServer(java.awt.event.ActionEvent evt) {
+                // Lógica para parar o servidor
         }
 
         private javax.swing.JButton jButton1;

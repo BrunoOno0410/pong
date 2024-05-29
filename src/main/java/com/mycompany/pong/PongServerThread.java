@@ -12,9 +12,12 @@ public class PongServerThread extends Thread {
     private BufferedReader input;
     private PrintWriter output;
     private PongServer server;
+    private PongServerForm form;
+    private final int paddleSpeed = 8; // Aumentar a velocidade dos paddles
 
     public PongServerThread(Socket socket, PongServer server, PongServerForm form) {
         this.socket = socket;
+        this.form = form;
         this.server = server;
     }
 
@@ -55,25 +58,27 @@ public class PongServerThread extends Thread {
                     case "player1":
                         switch (code) {
                             case KeyEvent.VK_UP:
-                                server.player1Y = Math.max(0, server.player1Y - 3);
+                                server.player1Y = Math.max(0, server.player1Y - paddleSpeed);
                                 break;
                             case KeyEvent.VK_DOWN:
-                                server.player1Y = Math.min(350, server.player1Y + 3);
+                                server.player1Y = Math.min(350, server.player1Y + paddleSpeed);
                                 break;
                         }
                         break;
                     case "player2":
                         switch (code) {
                             case KeyEvent.VK_UP:
-                                server.player2Y = Math.max(0, server.player2Y - 3);
+                                server.player2Y = Math.max(0, server.player2Y - paddleSpeed);
                                 break;
                             case KeyEvent.VK_DOWN:
-                                server.player2Y = Math.min(350, server.player2Y + 3);
+                                server.player2Y = Math.min(350, server.player2Y + paddleSpeed);
                                 break;
                         }
                         break;
                 }
+                form.repaint();
             }
+            socket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -1,124 +1,106 @@
 package com.mycompany.pong;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import java.awt.Graphics;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import javax.swing.JButton;
-import javax.swing.JTextField;
-import javax.swing.JLabel;
 
 public class PongClient extends JFrame {
+
     private Socket socket;
-    private BufferedReader in;
-    private PrintWriter out;
-    private GamePanel gamePanel;
-    private JTextField ipField, portField;
+    private BufferedReader input;
+    private PrintWriter output;
+    private JPanel gamePanel;
     private String player;
+    private int playerY = 150, ballX = 290, ballY = 190;
+    private int playerHeight = 50;
+    private int player1Score = 0, player2Score = 0;
 
-    public PongClient(String player) {
-        this.player = player; // Atribui o valor do jogador ao campo player
-        setTitle("Pong Client");
-        setSize(300, 200);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(null);
-
-        JLabel ipLabel = new JLabel("IP:");
-        ipLabel.setBounds(10, 10, 80, 25);
-        add(ipLabel);
-
-        ipField = new JTextField("localhost");
-        ipField.setBounds(100, 10, 160, 25);
-        add(ipField);
-
-        JLabel portLabel = new JLabel("Port:");
-        portLabel.setBounds(10, 40, 80, 25);
-        add(portLabel);
-
-        portField = new JTextField("1234");
-        portField.setBounds(100, 40, 160, 25);
-        add(portField);
-
-        JButton connectButton = new JButton("Connect");
-        connectButton.setBounds(10, 80, 250, 25);
-        connectButton.addActionListener(e -> connectToServer());
-        add(connectButton);
-
-        gamePanel = new GamePanel();
-        gamePanel.setBounds(10, 110, 260, 50);
-        add(gamePanel);
-
-        setVisible(true);
-    }
-
-    private void connectToServer() {
-        String ip = ipField.getText();
-        int port = Integer.parseInt(portField.getText());
-
+    public PongClient(String host, int port, String player) {
+        this.player = player;
         try {
-            socket = new Socket(ip, port);
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            out = new PrintWriter(socket.getOutputStream(), true);
-
-            // Enviar a identificação do jogador ao servidor
-            out.println(player);
-
-            // Thread para receber atualizações do servidor
-            new Thread(() -> {
-                try {
-                    String message;
-                    while ((message = in.readLine()) != null) {
-                        // Processar a mensagem do servidor (ex: atualizar posição do jogador, bola,
-                        // etc.)
-                        gamePanel.updateGameState(message);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }).start();
-
-            // Adicionar KeyListener para capturar eventos de tecla pressionada
-            gamePanel.addKeyListener(new KeyListener() {
-                @Override
-                public void keyPressed(KeyEvent e) {
-                    out.println("player:" + e.getKeyCode());
-                }
-
-                @Override
-                public void keyReleased(KeyEvent e) {
-                }
-
-                @Override
-                public void keyTyped(KeyEvent e) {
-                }
-            });
-            gamePanel.setFocusable(true);
-            gamePanel.requestFocusInWindow();
-
+            socket = new Socket(host, port);
+            input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            output = new PrintWriter(socket.getOutputStream(), true);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        initComponents();
+        startListening();
     }
 
-    private class GamePanel extends JPanel {
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-        }
+    private void initComponents() {
+        setTitle("Pong Game - " + player);
+        setSize(600, 400);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        gamePanel = new JPanel() {
+            @Override
+            public void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                updateGamePanel(g);
+            }
+        };
+        gamePanel.setBackground(Color.BLACK);
+        add(gamePanel);
 
-        public void updateGameState(String message) {
-            // Atualizar a interface do cliente conforme necessário
-            repaint();
+        addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                int key = e.getKeyCode();
+                output.println(player + ":" + key);
+            }
+        });
+        setFocusable(true);
+        setFocusTraversalKeysEnabled(false);
+    }
+
+    private void startListening() {
+        new Thread(() -> {
+            try {
+                String message;
+                while ((message = input.readLine()) != null) {
+                    if (message.startsWith("P1") || message.startsWith("P2")) {
+                        updateGameState(message);
+                    } else if (message.equals("START_GAME")) {
+                        // Lógica para iniciar o jogo, se necessário
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    private void updateGameState(String message) {
+        String[] parts = message.split(" ");
+        if (parts.length > 3) {
+            playerY = Integer.parseInt(parts[0].split(":")[1]);
+            ballX = Integer.parseInt(parts[2].split(":")[1].split(",")[0]);
+            ballY = Integer.parseInt(parts[2].split(":")[1].split(",")[1]);
+            player1Score = Integer.parseInt(parts[3].split(":")[1].split(",")[0]);
+            player2Score = Integer.parseInt(parts[3].split(":")[1].split(",")[1]);
+            gamePanel.repaint();
         }
+    }
+
+    private void updateGamePanel(Graphics g) {
+        g.setColor(Color.GREEN);
+        g.fillRect(10, playerY, 10, playerHeight);
+        g.fillRect(580, playerY, 10, playerHeight);
+        g.fillOval(ballX, ballY, 20, 20);
+        g.drawString("Player 1: " + player1Score, 10, 10);
+        g.drawString("Player 2: " + player2Score, 500, 10);
     }
 
     public static void main(String[] args) {
-        String player = args.length > 0 ? args[0] : "player1";
-        new PongClient(player);
+        String host = JOptionPane.showInputDialog("Enter server IP:");
+        int port = Integer.parseInt(JOptionPane.showInputDialog("Enter server port:"));
+        String player = JOptionPane.showInputDialog("Enter player (player1/player2):");
+
+        SwingUtilities.invokeLater(() -> new PongClient(host, port, player).setVisible(true));
     }
 }
