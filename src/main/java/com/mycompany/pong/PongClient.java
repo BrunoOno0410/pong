@@ -16,7 +16,7 @@ public class PongClient extends JFrame {
     private PrintWriter output;
     private JPanel gamePanel;
     private String player;
-    private int playerY = 150, ballX = 290, ballY = 190;
+    private int player1Y = 150, player2Y = 150, ballX = 290, ballY = 190;
     private int playerHeight = 50;
     private int player1Score = 0, player2Score = 0;
 
@@ -63,11 +63,12 @@ public class PongClient extends JFrame {
             try {
                 String message;
                 while ((message = input.readLine()) != null) {
-                    if (message.startsWith("P1") || message.startsWith("P2")) {
-                        updateGameState(message);
-                    } else if (message.equals("START_GAME")) {
-                        // Lógica para iniciar o jogo, se necessário
+                    if (message.equals("START_GAME")) {
+                        // Iniciar o jogo
+                        continue;
                     }
+                    parseMessage(message);
+                    gamePanel.repaint();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -75,32 +76,42 @@ public class PongClient extends JFrame {
         }).start();
     }
 
-    private void updateGameState(String message) {
+    private void parseMessage(String message) {
         String[] parts = message.split(" ");
-        if (parts.length > 3) {
-            playerY = Integer.parseInt(parts[0].split(":")[1]);
-            ballX = Integer.parseInt(parts[2].split(":")[1].split(",")[0]);
-            ballY = Integer.parseInt(parts[2].split(":")[1].split(",")[1]);
-            player1Score = Integer.parseInt(parts[3].split(":")[1].split(",")[0]);
-            player2Score = Integer.parseInt(parts[3].split(":")[1].split(",")[1]);
-            gamePanel.repaint();
-        }
+        if (parts.length != 4)
+            return;
+
+        String[] p1 = parts[0].split(":");
+        player1Y = Integer.parseInt(p1[1]);
+
+        String[] p2 = parts[1].split(":");
+        player2Y = Integer.parseInt(p2[1]);
+
+        String[] ball = parts[2].split(":");
+        String[] ballPos = ball[1].split(",");
+        ballX = Integer.parseInt(ballPos[0]);
+        ballY = Integer.parseInt(ballPos[1]);
+
+        String[] score = parts[3].split(":");
+        String[] scores = score[1].split(",");
+        player1Score = Integer.parseInt(scores[0]);
+        player2Score = Integer.parseInt(scores[1]);
     }
 
     private void updateGamePanel(Graphics g) {
         g.setColor(Color.GREEN);
-        g.fillRect(10, playerY, 10, playerHeight);
-        g.fillRect(580, playerY, 10, playerHeight);
-        g.fillOval(ballX, ballY, 20, 20);
-        g.drawString("Player 1: " + player1Score, 10, 10);
-        g.drawString("Player 2: " + player2Score, 500, 10);
+        g.fillRect(10, player1Y, 10, playerHeight); // Player 1
+        g.fillRect(580, player2Y, 10, playerHeight); // Player 2
+        g.fillOval(ballX, ballY, 20, 20); // Ball
+        g.drawString("Player 1: " + player1Score, 50, 10);
+        g.drawString("Player 2: " + player2Score, 450, 10);
     }
 
     public static void main(String[] args) {
-        String host = JOptionPane.showInputDialog("Enter server IP:");
-        int port = Integer.parseInt(JOptionPane.showInputDialog("Enter server port:"));
+        String host = "localhost";
+        int port = 1234;
         String player = JOptionPane.showInputDialog("Enter player (player1/player2):");
-
-        SwingUtilities.invokeLater(() -> new PongClient(host, port, player).setVisible(true));
+        PongClient client = new PongClient(host, port, player);
+        client.setVisible(true);
     }
 }

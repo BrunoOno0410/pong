@@ -36,6 +36,13 @@ public class PongServer extends Thread {
                 System.out.println("New client connected");
                 form.updateStatus("New client connected");
                 PongServerThread clientThread = new PongServerThread(clientSocket, this, form);
+
+                if (clients.size() == 0) {
+                    clientThread.setPlayer("player1");
+                } else if (clients.size() == 1) {
+                    clientThread.setPlayer("player2");
+                }
+
                 clients.add(clientThread);
                 clientThread.start();
 

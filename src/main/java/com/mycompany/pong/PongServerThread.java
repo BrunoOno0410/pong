@@ -15,10 +15,16 @@ public class PongServerThread extends Thread {
     private PongServerForm form;
     private final int paddleSpeed = 8; // Aumentar a velocidade dos paddles
 
+    private String player; // Identificar qual jogador é
+
     public PongServerThread(Socket socket, PongServer server, PongServerForm form) {
         this.socket = socket;
         this.form = form;
         this.server = server;
+    }
+
+    public void setPlayer(String player) {
+        this.player = player;
     }
 
     @Override
@@ -45,7 +51,6 @@ public class PongServerThread extends Thread {
                     continue;
                 }
 
-                String player = parts[0];
                 int code;
                 try {
                     code = Integer.parseInt(parts[1]);
@@ -54,27 +59,25 @@ public class PongServerThread extends Thread {
                     continue;
                 }
 
-                switch (player) {
-                    case "player1":
-                        switch (code) {
-                            case KeyEvent.VK_UP:
-                                server.player1Y = Math.max(0, server.player1Y - paddleSpeed);
-                                break;
-                            case KeyEvent.VK_DOWN:
-                                server.player1Y = Math.min(350, server.player1Y + paddleSpeed);
-                                break;
-                        }
-                        break;
-                    case "player2":
-                        switch (code) {
-                            case KeyEvent.VK_UP:
-                                server.player2Y = Math.max(0, server.player2Y - paddleSpeed);
-                                break;
-                            case KeyEvent.VK_DOWN:
-                                server.player2Y = Math.min(350, server.player2Y + paddleSpeed);
-                                break;
-                        }
-                        break;
+                // Atualizar posição do jogador baseado na tecla pressionada
+                if ("player1".equals(player)) {
+                    switch (code) {
+                        case KeyEvent.VK_UP:
+                            server.player1Y = Math.max(0, server.player1Y - paddleSpeed);
+                            break;
+                        case KeyEvent.VK_DOWN:
+                            server.player1Y = Math.min(350, server.player1Y + paddleSpeed);
+                            break;
+                    }
+                } else if ("player2".equals(player)) {
+                    switch (code) {
+                        case KeyEvent.VK_UP:
+                            server.player2Y = Math.max(0, server.player2Y - paddleSpeed);
+                            break;
+                        case KeyEvent.VK_DOWN:
+                            server.player2Y = Math.min(350, server.player2Y + paddleSpeed);
+                            break;
+                    }
                 }
                 form.repaint();
             }
