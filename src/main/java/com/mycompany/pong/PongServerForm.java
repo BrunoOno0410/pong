@@ -7,9 +7,9 @@ import javax.swing.SwingUtilities;
 
 public class PongServerForm extends javax.swing.JFrame {
 
-        int player1Y = 150, player2Y = 150, ballX = 290, ballY = 190, ballDirX = 3, ballDirY = 3;
-        int playerHeight = 50;
-        int player1Score = 0, player2Score = 0;
+        private int player1Y = 150, player2Y = 150, ballX = 290, ballY = 190;
+        private int playerHeight = 50;
+        private int player1Score = 0, player2Score = 0;
 
         public PongServerForm() {
                 initComponents();
@@ -24,17 +24,31 @@ public class PongServerForm extends javax.swing.JFrame {
                 g.drawString("Player 2: " + player2Score, 500, 10);
         }
 
-        // New method to update status
+        public void updateGameState(String message) {
+                String[] parts = message.split(" ");
+                if (parts.length > 3) {
+                        player1Y = Integer.parseInt(parts[0].split(":")[1]);
+                        player2Y = Integer.parseInt(parts[1].split(":")[1]);
+                        String[] ballCoords = parts[2].split(":")[1].split(",");
+                        if (ballCoords.length > 1) {
+                                ballX = Integer.parseInt(ballCoords[0]);
+                                ballY = Integer.parseInt(ballCoords[1]);
+                        }
+                        String[] scores = parts[3].split(":")[1].split(",");
+                        if (scores.length > 1) {
+                                player1Score = Integer.parseInt(scores[0]);
+                                player2Score = Integer.parseInt(scores[1]);
+                        }
+                }
+                jPanel1.repaint();
+        }
+
         public void updateStatus(String message) {
                 SwingUtilities.invokeLater(() -> {
-                        // Assuming there's a JLabel named statusLabel to display the status
                         statusLabel.setText(message);
                 });
         }
 
-        // Existing code
-        // <editor-fold defaultstate="collapsed" desc="Generated
-        // Code">//GEN-BEGIN:initComponents
         private void initComponents() {
                 jLabel1 = new javax.swing.JLabel();
                 jTextField1 = new javax.swing.JTextField();
@@ -46,7 +60,7 @@ public class PongServerForm extends javax.swing.JFrame {
                                 atualizaPainel(g);
                         }
                 };
-                statusLabel = new javax.swing.JLabel(); // Add a JLabel for status
+                statusLabel = new javax.swing.JLabel();
 
                 setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
                 jLabel1.setText("Porta do servidor TCP:");
@@ -67,7 +81,6 @@ public class PongServerForm extends javax.swing.JFrame {
                                 jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                                 .addGap(0, 401, Short.MAX_VALUE));
 
-                // Set up the layout including the new statusLabel
                 javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
                 getContentPane().setLayout(layout);
                 layout.setHorizontalGroup(
@@ -94,10 +107,7 @@ public class PongServerForm extends javax.swing.JFrame {
                                                                                                 .addPreferredGap(
                                                                                                                 javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                                                                                 .addComponent(jButton2))
-                                                                                .addComponent(statusLabel)) // Add
-                                                                                                            // statusLabel
-                                                                                                            // to the
-                                                                                                            // layout
+                                                                                .addComponent(statusLabel))
                                                                 .addContainerGap(18, Short.MAX_VALUE)));
                 layout.setVerticalGroup(
                                 layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -120,8 +130,7 @@ public class PongServerForm extends javax.swing.JFrame {
                                                                                 javax.swing.GroupLayout.PREFERRED_SIZE)
                                                                 .addPreferredGap(
                                                                                 javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                                .addComponent(statusLabel) // Add statusLabel to the
-                                                                                           // layout
+                                                                .addComponent(statusLabel)
                                                                 .addContainerGap(23, Short.MAX_VALUE)));
                 pack();
         }
@@ -145,5 +154,5 @@ public class PongServerForm extends javax.swing.JFrame {
         private javax.swing.JLabel jLabel1;
         private javax.swing.JPanel jPanel1;
         private javax.swing.JTextField jTextField1;
-        private javax.swing.JLabel statusLabel; // Declare statusLabel
+        private javax.swing.JLabel statusLabel;
 }

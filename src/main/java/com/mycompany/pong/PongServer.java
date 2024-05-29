@@ -12,10 +12,10 @@ public class PongServer extends Thread {
     private ServerSocket serverSocket;
     private List<PongServerThread> clients;
     private boolean gameStarted = false;
-    public int player1Score = 0; // Torne os campos públicos
-    public int player2Score = 0; // Torne os campos públicos
+    public int player1Score = 0;
+    public int player2Score = 0;
     private int ballX = 290, ballY = 190, ballDirX = 3, ballDirY = 3;
-    private int player1Y = 150, player2Y = 150;
+    public int player1Y = 150, player2Y = 150;
     private final int playerHeight = 50;
 
     public PongServer(int port, PongServerForm form) {

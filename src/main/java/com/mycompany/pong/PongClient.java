@@ -7,29 +7,64 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import javax.swing.JButton;
+import javax.swing.JTextField;
+import javax.swing.JLabel;
 
 public class PongClient extends JFrame {
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
     private GamePanel gamePanel;
+    private JTextField ipField, portField;
+    private String player;
 
     public PongClient(String player) {
+        this.player = player; // Atribui o valor do jogador ao campo player
+        setTitle("Pong Client");
+        setSize(300, 200);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(null);
+
+        JLabel ipLabel = new JLabel("IP:");
+        ipLabel.setBounds(10, 10, 80, 25);
+        add(ipLabel);
+
+        ipField = new JTextField("localhost");
+        ipField.setBounds(100, 10, 160, 25);
+        add(ipField);
+
+        JLabel portLabel = new JLabel("Port:");
+        portLabel.setBounds(10, 40, 80, 25);
+        add(portLabel);
+
+        portField = new JTextField("1234");
+        portField.setBounds(100, 40, 160, 25);
+        add(portField);
+
+        JButton connectButton = new JButton("Connect");
+        connectButton.setBounds(10, 80, 250, 25);
+        connectButton.addActionListener(e -> connectToServer());
+        add(connectButton);
+
+        gamePanel = new GamePanel();
+        gamePanel.setBounds(10, 110, 260, 50);
+        add(gamePanel);
+
+        setVisible(true);
+    }
+
+    private void connectToServer() {
+        String ip = ipField.getText();
+        int port = Integer.parseInt(portField.getText());
+
         try {
-            socket = new Socket("localhost", 1234); // Certifique-se de que o endereço e a porta estão corretos
+            socket = new Socket(ip, port);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out = new PrintWriter(socket.getOutputStream(), true);
-
-            setTitle("Pong Game - " + player);
-            setSize(600, 400);
-            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            gamePanel = new GamePanel();
-            add(gamePanel);
-            setVisible(true);
 
             // Enviar a identificação do jogador ao servidor
             out.println(player);
@@ -41,11 +76,7 @@ public class PongClient extends JFrame {
                     while ((message = in.readLine()) != null) {
                         // Processar a mensagem do servidor (ex: atualizar posição do jogador, bola,
                         // etc.)
-                        if (message.equals("START_GAME")) {
-                            gamePanel.startGame();
-                        } else {
-                            gamePanel.updateGameState(message);
-                        }
+                        gamePanel.updateGameState(message);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -56,7 +87,7 @@ public class PongClient extends JFrame {
             gamePanel.addKeyListener(new KeyListener() {
                 @Override
                 public void keyPressed(KeyEvent e) {
-                    out.println(player + ":" + e.getKeyCode());
+                    out.println("player:" + e.getKeyCode());
                 }
 
                 @Override
@@ -76,42 +107,13 @@ public class PongClient extends JFrame {
     }
 
     private class GamePanel extends JPanel {
-        int player1Y = 150, player2Y = 150, ballX = 290, ballY = 190;
-        private int player1Score = 0, player2Score = 0;
-
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
-            g.setColor(Color.GREEN);
-            g.fillRect(10, player1Y, 10, 50);
-            g.fillRect(580, player2Y, 10, 50);
-            g.fillOval(ballX, ballY, 20, 20);
-            g.drawString("Player 1: " + player1Score, 10, 10);
-            g.drawString("Player 2: " + player2Score, 500, 10);
         }
 
         public void updateGameState(String message) {
-            // Processar a mensagem e atualizar os estados do jogo
-            // Exemplo de mensagem: "P1:150 P2:150 BALL:290,190 SCORE:1,0"
-            String[] parts = message.split(" ");
-            if (parts.length > 3) {
-                player1Y = Integer.parseInt(parts[0].split(":")[1]);
-                player2Y = Integer.parseInt(parts[1].split(":")[1]);
-                String[] ballCoords = parts[2].split(":")[1].split(",");
-                if (ballCoords.length > 1) {
-                    ballX = Integer.parseInt(ballCoords[0]);
-                    ballY = Integer.parseInt(ballCoords[1]);
-                }
-                String[] scores = parts[3].split(":")[1].split(",");
-                if (scores.length > 1) {
-                    player1Score = Integer.parseInt(scores[0]);
-                    player2Score = Integer.parseInt(scores[1]);
-                }
-            }
+            // Atualizar a interface do cliente conforme necessário
             repaint();
-        }
-
-        public void startGame() {
-            // Iniciar a lógica do jogo se necessário
         }
     }
 

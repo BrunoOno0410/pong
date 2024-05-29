@@ -8,16 +8,13 @@ import java.net.Socket;
 import java.awt.event.KeyEvent;
 
 public class PongServerThread extends Thread {
-
     private Socket socket;
     private BufferedReader input;
     private PrintWriter output;
-    private PongServerForm form;
     private PongServer server;
 
     public PongServerThread(Socket socket, PongServer server, PongServerForm form) {
         this.socket = socket;
-        this.form = form;
         this.server = server;
     }
 
@@ -58,38 +55,31 @@ public class PongServerThread extends Thread {
                     case "player1":
                         switch (code) {
                             case KeyEvent.VK_UP:
-                                form.player1Y = Math.max(0, form.player1Y - 3);
+                                server.player1Y = Math.max(0, server.player1Y - 3);
                                 break;
                             case KeyEvent.VK_DOWN:
-                                form.player1Y = Math.min(350, form.player1Y + 3);
+                                server.player1Y = Math.min(350, server.player1Y + 3);
                                 break;
                         }
                         break;
                     case "player2":
                         switch (code) {
                             case KeyEvent.VK_UP:
-                                form.player2Y = Math.max(0, form.player2Y - 3);
+                                server.player2Y = Math.max(0, server.player2Y - 3);
                                 break;
                             case KeyEvent.VK_DOWN:
-                                form.player2Y = Math.min(350, form.player2Y + 3);
+                                server.player2Y = Math.min(350, server.player2Y + 3);
                                 break;
                         }
                         break;
-                    default:
-                        System.out.println("Player desconhecido: " + player);
-                        continue;
                 }
-                form.repaint();
-                server.broadcast("P1:" + form.player1Y + " P2:" + form.player2Y + " BALL:" + form.ballX + ","
-                        + form.ballY + " SCORE:" + server.player1Score + "," + server.player2Score);
             }
-            socket.close();
-        } catch (IOException ex) {
-            System.out.println("Erro na thread do servidor: " + ex.getMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    synchronized void sendMessage(String message) {
+    public void sendMessage(String message) {
         output.println(message);
     }
 }
